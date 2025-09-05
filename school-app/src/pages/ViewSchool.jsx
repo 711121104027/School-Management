@@ -2,19 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../ViewSchool.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
 function ViewSchool() {
   const navigate = useNavigate();
   const [schools, setSchools] = useState([]);
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("http://127.0.0.1:5000/get-schools");
+      const res = await fetch(`${API_URL}/get-schools`);
       const data = await res.json();
 
       const updatedData = data.map((s) => ({
         ...s,
         image_url: s.image
-          ? `http://127.0.0.1:5000/schoolImages/${s.image}`
+          ? `${API_URL}/schoolImages/${s.image}`
           : null,
       }));
       setSchools(updatedData);
@@ -27,7 +28,7 @@ function ViewSchool() {
     if (!window.confirm("Are you sure you want to delete this school?")) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/delete-school/${id}`, {
+      const response = await fetch(`${API_URL}/delete-school/${id}`, {
         method: "DELETE",
       });
 
