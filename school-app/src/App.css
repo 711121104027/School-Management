@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  height: 100vh;
+  padding: 20px;
+}
+
+
+.card {
+  background: #F6E5D6;       
+  border: 2px solid #F2BE50;
+  border-radius: 10px;       
+  padding: 20px;
+  width: 250px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;    
+  align-items: center;
+  transition: transform 0.3s;
+}
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card1 {
+  background: #D6F0F6;       
+  border: 2px solid #38BCDB;
+  border-radius: 10px;       
+  padding: 20px;
+  width: 250px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;    
+  align-items: center;
+  transition: transform 0.3s;
+}
+.card1:hover {
+  transform: scale(1.05);
+}
+
+
+
+
+.school-img {
+  width: 200px;
+  height: auto;
+  margin-bottom: 15px; 
+}
+
+.btn {
+  background: #4a90e2;
+  border: none;
+  color: white;
+  padding: 10px 55px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.btn:hover {
+  background: #282499;
+}
+
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; 
+    align-items: stretch;  
+  }
+
+  .card {
+    width: 100%;            
+    max-width: 350px;       
+    margin: 0 auto;         
+  }
+
+  .card1 {
+    width: 100%;            
+    max-width: 350px;       
+    margin: 0 auto;         
+  }
+}
