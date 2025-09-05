@@ -1,5 +1,5 @@
-flask
-flask-cors
-gunicorn
-pymysql    # or mysqlclient / mysql-connector-python (match your code)
-python-dotenv
+Flask==2.2.5
+flask-cors==3.0.10
+gunicorn==20.1.0
+pymysql==1.0.3          # or mysql-connector-python if you prefer
+python-dotenv==1.0.0    # optional, helpful for local dev
