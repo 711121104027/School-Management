@@ -1,27 +1,70 @@
+import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import os
 from werkzeug.utils import secure_filename
-from db_config import get_connection
+import pymysql  # replace with mysql-connector-python if you prefer
 
+# ----------------------------------
+# Load environment variables
+# ----------------------------------
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = int(os.environ.get("DB_PORT", 3306))
+DB_USER = os.environ.get("DB_USER", "root")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_NAME = os.environ.get("DB_NAME", "school_db")
+
+UPLOAD_FOLDER = "schoolImages"
+
+# ----------------------------------
+# Flask app setup
+# ----------------------------------
 app = Flask(__name__)
-CORS(app)
-app.config['UPLOAD_FOLDER'] = 'schoolImages'
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# CORS: allow only frontend origin (set in Render dashboard)
+frontend_origin = os.environ.get("FRONTEND_ORIGIN", "*")
+CORS(app, resources={r"/*": {"origins": frontend_origin}})
 
 
-@app.route('/add-school', methods=['POST'])
+# ----------------------------------
+# DB connection helper
+# ----------------------------------
+def get_connection():
+    return pymysql.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor,
+        autocommit=True,
+    )
+
+
+# ----------------------------------
+# Routes
+# ----------------------------------
+
+@app.route("/add-school", methods=["POST"])
 def add_school():
     data = request.form
-    image = request.files['image']
+    image = request.files["image"]
     filename = secure_filename(image.filename)
-    image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    image.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
     conn = get_connection()
     cursor = conn.cursor()
     query = """INSERT INTO schools (name, address, city, state, contact, image, email_id)
                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-    values = (data['name'], data['address'], data['city'], data['state'],
-              data['contact'], filename, data['email_id'])
+    values = (
+        data["name"],
+        data["address"],
+        data["city"],
+        data["state"],
+        data["contact"],
+        filename,
+        data["email_id"],
+    )
     cursor.execute(query, values)
     conn.commit()
     cursor.close()
@@ -29,10 +72,10 @@ def add_school():
     return jsonify({"message": "School added successfully"}), 201
 
 
-@app.route('/get-schools', methods=['GET'])
+@app.route("/get-schools", methods=["GET"])
 def get_schools():
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     cursor.execute("SELECT * FROM schools")
     schools = cursor.fetchall()
     cursor.close()
@@ -40,10 +83,10 @@ def get_schools():
     return jsonify(schools)
 
 
-@app.route('/delete-school/<int:school_id>', methods=['DELETE'])
+@app.route("/delete-school/<int:school_id>", methods=["DELETE"])
 def delete_school(school_id):
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     cursor.execute("SELECT image FROM schools WHERE id = %s", (school_id,))
     school = cursor.fetchone()
@@ -57,7 +100,7 @@ def delete_school(school_id):
     conn.commit()
 
     if school["image"]:
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], school["image"])
+        image_path = os.path.join(app.config["UPLOAD_FOLDER"], school["image"])
         if os.path.exists(image_path):
             os.remove(image_path)
 
@@ -65,12 +108,18 @@ def delete_school(school_id):
     conn.close()
     return jsonify({"message": "School deleted successfully"}), 200
 
-@app.route('/schoolImages/<filename>')
+
+@app.route("/schoolImages/<filename>")
 def serve_image(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
-if __name__ == '__main__':
-    if not os.path.exists('schoolImages'):
-        os.makedirs('schoolImages')
-    app.run(debug=True)
+# ----------------------------------
+# Local dev entrypoint
+# ----------------------------------
+if __name__ == "__main__":
+    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+        os.makedirs(app.config["UPLOAD_FOLDER"])
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
