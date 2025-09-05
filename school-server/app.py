@@ -22,8 +22,8 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # CORS: allow only frontend origin (set in Render dashboard)
-frontend_origin = os.environ.get("FRONTEND_ORIGIN", "*")
-CORS(app, resources={r"/*": {"origins": frontend_origin}})
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "*")
+CORS(app, origins=[FRONTEND_ORIGIN])
 
 
 # ----------------------------------
