@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../AddSchool.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
 function AddSchool() {
   const navigate = useNavigate();
   const fileRef = useRef(null);
@@ -49,7 +50,7 @@ function AddSchool() {
     fd.append("email_id", form.email_id);
     if (file) fd.append("image", file);
 
-    const res = await fetch("http://127.0.0.1:5000/add-school", {
+    const res = await fetch(`${API_URL}/add-school`, {
       method: "POST",
       body: fd,
     });
